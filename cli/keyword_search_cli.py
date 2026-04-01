@@ -1,7 +1,7 @@
 import argparse
 import json
-from shutil import move
 import string
+from nltk.stem import PorterStemmer
 
 file_path = "./data/movies.json"
 
@@ -74,10 +74,14 @@ def stop_word_filter(tokens: list[str], stop_words: list[str]):
     clean_tokens = []
     for token in tokens:
         if token not in stop_words:
-            clean_tokens.append(token)
+            stem_token = stem_word(token)
+            clean_tokens.append(stem_token)
     return clean_tokens
     
-
+def stem_word(token:str):
+    stemmer = PorterStemmer()
+    stem_word = stemmer.stem(token)
+    return stem_word
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Keyword Search CLI")
