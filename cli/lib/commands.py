@@ -6,25 +6,25 @@ from cli.lib import CACHE_DIR, DOCMAP_PATH, INDEX_PATH, has_matching_tokens, loa
 def search_command(query, file_path, limit = 5):
     data = load_data(file_path=file_path)
     stop_words = load_stop_words()
+    inverted_index = InvertedIndex()
+    inverted_index.load()
 
-    movies = data["movies"]
+    # print(index)
+
+    # movies = data["movies"]
 
     result = []
 
-    for movie in movies:
-        tokenized_title: str = tokenize_text(movie["title"])
-        tokenized_query: str = tokenize_text(query)
+    for token in tokenize_text(query):
+        doc_ids =inverted_index.get_documents(token)
 
-        filtered_title_tokens = stop_word_filter(tokens=tokenized_title, stop_words=stop_words)
-        filtered_query_tokens = stop_word_filter(tokens=tokenized_query, stop_words=stop_words)
-     
-        if has_matching_tokens(query_tokens=filtered_query_tokens, title_tokens=filtered_title_tokens):
-            result.append(movie)
+        for doc_id in doc_ids:
+            movie = inverted_index.docmap.get(doc_id)
+            movie_title = movie["title"]
+            result.append({"id": doc_id, "title": movie_title})
+            if len(result) >= limit:
+                break
 
-
-        if len(result) >= limit:
-            break
-        
     return result
 
 class InvertedIndex():
@@ -60,9 +60,26 @@ class InvertedIndex():
         with open(DOCMAP_PATH, "wb") as file:
             pickle.dump(self.docmap, file=file)
 
+    def load(self):
+        is_index_file = os.path.isfile(INDEX_PATH)
+        is_docmap_file = os.path.isfile(DOCMAP_PATH)
+        if(not is_index_file):
+            print("Index File not found")
+            return
+
+        if(not is_docmap_file):
+            print("DOCMAP File not found")
+            return
+
+        with open(INDEX_PATH, "rb") as file:
+            self.index =  pickle.load(file)
+
+        with open(DOCMAP_PATH, "rb") as file:
+            self.docmap =  pickle.load(file)
+       
+
 def build_command():
     inverted_index = InvertedIndex()
     inverted_index.build()
     inverted_index.save()
-    docs = inverted_index.get_documents("merida")
-    print(f"First document for token 'merida' = {docs[0]}")
+    # docs = inverted_index.get_documents("merida")
