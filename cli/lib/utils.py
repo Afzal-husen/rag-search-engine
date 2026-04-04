@@ -1,8 +1,18 @@
 import json
 import string
 from nltk.stem import PorterStemmer
+import os
 
-def load_data(file_path:str):
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+DATA_DIR_PATH = os.path.join(PROJECT_ROOT, "data", "movies.json")
+STOPWORDS_DIR_PATH = os.path.join(PROJECT_ROOT, "data", "stopwords.txt")
+CACHE_DIR = os.path.join(PROJECT_ROOT, "cache")
+INDEX_PATH = os.path.join(CACHE_DIR, "index.pkl")
+DOCMAP_PATH = os.path.join(CACHE_DIR, "docmap.pkl")
+
+
+
+def load_data(file_path:str = DATA_DIR_PATH):
     try:
         with open(file_path, "r", encoding="utf-8") as file:
             
@@ -36,7 +46,7 @@ def has_matching_tokens(query_tokens: list[str], title_tokens: list[str]):
     return False
 
 def load_stop_words():
-    with open("./data/stopwords.txt", "r", encoding="utf-8") as file:
+    with open(STOPWORDS_DIR_PATH, "r", encoding="utf-8") as file:
         data = file.read()
         words_list = data.splitlines()
         return words_list
